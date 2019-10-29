@@ -15,9 +15,9 @@ nGates = 10;
 nMutations = 500;
 nIndividuals = 100;
 nInputs = 3;
-nIterations = 3000;
+nIterations = 2000;
 mutationRate = 0.1;
-targetOutput = [1 1 1 1 0 1 1 1];
+targetOutput = [1 1 1 0 0 1 1 1];
 nComponents = nGates + nInputs;
 
 % Initialize the population and best individual
@@ -160,7 +160,7 @@ end
 
 % Plot the minumum and average fitness across iterations
 subplot(2,1,1)
-plot(minFitness,'b');
+plot(minFitness,'r');
 title('Minimum fitness','interpreter','latex','fontsize',20);
 ylabel('fitness','interpreter','latex','fontsize',20);
 subplot(2,1,2)
