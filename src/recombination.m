@@ -6,7 +6,7 @@ function population = recombination(population, bestIndividuals, nGates, nInputs
 % Inputs: 
 % - population: Connectivity matrix of the population (not repopulated)
 % - bestIndividuals: Connectivity matrix of the individuals with better fitness
-%                    (cell 1 x x nSelected)
+%                    (1 x nSelected cell)
 % - nGates: Number of logic gates conforming the individuals (int)
 % - nInputs: Number of total inputs in the individual (int)
 % – nIndividuals: Number of total individuals conforming the population (int)

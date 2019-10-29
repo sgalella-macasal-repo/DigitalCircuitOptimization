@@ -1,26 +1,32 @@
-%%%%% Main %%%%%
+function [bestOutput, bestIndividual] = circuitoptimizer(Params, targetOutput)
 %
-% Setup and run the genetic algorithm
+% Function:
+% - circuitoptimizer: Computes the optimization of a circuit for targetOutput 
+%
+% Inputs: 
+% - Params: Parameters for the genetic algorithm (1 x 1 struct)
+% - targetOutput: Desired output for the circuit (1 x 2^nInputs)
+%
+% Outputs:
+% - bestOutput: Output achieved by the best circuit (1 x 2^nInputs)
+% - bestIndividual: Connectivity matrix of the best circuit
 %
 % Authors: mikirubio & sgalella
 % https://github.com/sgalella-mikirubio-repo
 
-% Set the random seed for controlling rng
-runSeed = 4321;
-rng(runSeed);
 
-% Setup of the algorithm
-iInfo = 250;
-nGates = 10;
-nMutations = 500;
-nIndividuals = 100;
-nInputs = 3;
-nIterations = 3000;
-mutationRate = 0.1;
-targetOutput = [1 1 1 1 0 1 1 1];
-nComponents = nGates + nInputs;
+iInfo = Params.iInfo;
+nGates = Params.nGates;
+nMutations = Params.nMutations;
+nIndividuals = Params.nIndividuals;
+nInputs = Params.nInputs;
+nIterations = Params.nIterations;
+mutationRate = Params.mutationRate;
+nComponents = Params.nComponents;
+isDisplay = Params.isDisplay;
+isPlot = Params.isPlot;
 
-% Initialize the population and best individual
+% Initialize the population, best individual and best fitness
 population = zeros(nComponents, nComponents, nIndividuals); 
 bestIndividual = zeros(nComponents);
 
@@ -138,7 +144,7 @@ for iIteration = 2:nIterations
     totalGates = sum(sum(bestIndividual) > 0);
     totalConnections = sum(sum(bestIndividual));
     
-    if mod(iIteration, iInfo) == 0
+    if ((mod(iIteration, iInfo) == 0) && isDisplay)
         clc;
         fprintf('--------- Digital Circuit Optimization ---------\n')
         fprintf("\nNumber of iterations: %d",iIteration);
@@ -154,17 +160,23 @@ for iIteration = 2:nIterations
 
 end
 
-if (bestHamming > 1)
+if (bestHamming > 0)
     warning("\nNo optimal solution could be found.")
 end
 
 % Plot the minumum and average fitness across iterations
-subplot(2,1,1)
-plot(minFitness,'b');
-title('Minimum fitness','interpreter','latex','fontsize',20);
-ylabel('fitness','interpreter','latex','fontsize',20);
-subplot(2,1,2)
-plot(avgFitness,'b');
-title('Average fitness','interpreter','latex','fontsize',20);
-xlabel('iterations','interpreter','latex','fontsize',20);
-ylabel('fitness','interpreter','latex','fontsize',20)
+if isPlot
+    subplot(2,1,1)
+    plot(minFitness,'b');
+    title('Minimum fitness','interpreter','latex','fontsize',20);
+    ylabel('fitness','interpreter','latex','fontsize',20);
+    subplot(2,1,2)
+    plot(avgFitness,'b');
+    title('Average fitness','interpreter','latex','fontsize',20);
+    xlabel('iterations','interpreter','latex','fontsize',20);
+    ylabel('fitness','interpreter','latex','fontsize',20)
+end
+
+
+end
+
