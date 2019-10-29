@@ -6,7 +6,7 @@ MATLAB implementation of an evolutionary algorithm for designing and optimizing 
     <figure>
     <img width="350" height="250" src="images/input-output.jpg">
         <figcaption>
-        <br><i>Fig 1. Truth table for three inputs and a desired output (green).</i>>
+        <br><i>Fig 1. Truth table for three inputs and a desired output (green).</i>
         </figcaption>
     </figure>
 </p>
