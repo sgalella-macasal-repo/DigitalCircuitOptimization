@@ -1,187 +1,170 @@
-%% BooleanCircuitOptimization
-% Authors: mikirubio, sgalella
+%%%%% Main %%%%%
+%
+% Setup and run the genetic algorithm
+%
+% Authors: mikirubio & sgalella
+% https://github.com/sgalella-mikirubio-repo
+
+% Set the random seed for controlling rng
+runSeed = 123;
+rng(runSeed);
 
 % Setup of the algorithm
-number_iterations = 1000;
-number_gates = 10;
-number_individuals = 100;
-mutation_rateMAX = 0.1;
-number_inputs = 3;
-target_output = [0 1 1 1 1 1 0 1];
+iInfo = 250;
+nGates = 10;
+nMutations = 500;
+nIndividuals = 100;
+nInputs = 3;
+nIterations = 2000;
+mutationRate = 0.1;
+targetOutput = [0 1 1 1 1 1 0 1];
+nComponents = nGates + nInputs;
 
-% Table initialization
-tabla = zeros(number_gates+number_inputs,number_gates+number_inputs,number_individuals);    % Matriz de conexiones.
-
+% Initialize the population, best individual and best fitness
+population = zeros(nComponents, nComponents, nIndividuals); 
+bestIndividual = zeros(nComponents);
+bestFitness = Inf;
 
 % Control sequences
-if length(target_output)~=2^number_inputs 
-    error('Length of output objective has to be equal to 2^number_inputs.')
+assert(2^nInputs == size(targetOutput, 2), ['The size of the ' ...
+    'output has to be equal to 2^nInputs']);
+assert(nGates > 1, 'Number of gates has to be larger than 1');
+
+% Initialize the binary input table
+inputs = NaN(2^nInputs, nInputs);
+for iInput = 0:(2^nInputs)-1
+    inputs(iInput+1,:) = de2bi(iInput,nInputs,'left-msb');
 end
 
-for i = 0:(2^number_inputs)-1
-    inputs (i+1,:) =de2bi(i,number_inputs,'left-msb');
+% Generate initial population (iIteration = 1)
+% Initialize variables
+fitnessHamming = NaN(1, nIndividuals);
+fitnessCost = NaN(1, nIndividuals);
+sumRows = NaN(nComponents, nIndividuals);
+sumColumns = NaN(nComponents, nIndividuals);
+statesMatrixPopulation = NaN(2^nInputs, nComponents, nIndividuals);
+outputs = NaN(nIndividuals, 2^nInputs);
+
+% Compute each individual and its fitness
+for iSelected = 1:nIndividuals
+    population(:,:,iSelected) = mutation(population(:,:,iSelected),nMutations,nGates,nInputs,1);
+    sumRows(:,iSelected) = sum(population(:,:,iSelected),2);
+    sumColumns(:,iSelected) = sum(population(:,:,iSelected));                                                     
+    [statesMatrixPopulation(:,:,iSelected), outputs(iSelected,:)] = ...
+        output(population(:,:,iSelected), nGates, nInputs,inputs,sumColumns(:,iSelected));
+    fitnessHamming(iSelected) = hamming(outputs(iSelected,:),nInputs,targetOutput);
+    fitnessCost(iSelected) = cost(nInputs,nGates,sumColumns(:,iSelected));
 end
 
-if number_gates == 1
-    warning('Number of gates equals to 1. No recombination possible.')
+% Compute the fitness of the first population
+globalFitness = fitness(fitnessHamming, fitnessCost, nGates);
+avgFitness = mean(globalFitness(3,:));
+minFitness = min(globalFitness(3,:));
+finalSelection = selection(globalFitness, nIndividuals);
+nSelected = size(finalSelection(1,:), 2);
+
+% Store the best individuals, initialize again the population and 
+% repopulate the population with them
+bestIndividuals = cell(1, nSelected);
+for iSelected = 1:nSelected
+    bestIndividuals{iSelected} = population(:,:,finalSelection(2,iSelected));
+end
+population = zeros(size(population));
+for iSelected = 1:nSelected
+    population(:,:,iSelected)= bestIndividuals{iSelected};
 end
 
-fitness_hamming = zeros(1,number_individuals);
-fitness_coste = zeros(1,number_individuals);
-fitness_global = zeros(3,number_individuals);
+% Compute the subsequent nIterations - 1 populations
+for iIteration = 2:nIterations
 
-% Population generation
- for k = 1:number_individuals
-    tabla(:,:,k) = mutation(tabla(:,:,k),500,number_gates,number_inputs,1);
- end
-
- 
-for k = 1:number_individuals
-
-suma_columnas(:,k) = sum(tabla(:,:,k));                                                     
-
-suma_filas(:,k) = sum(tabla(:,:,k),2);
-
-[estados(:,:,:), matriz_estados(:,:,k), outputs(k,:)] = output(tabla(:,:,k),number_gates, number_inputs,inputs,suma_columnas(:,k));
-
-end
-
-for k = 1:number_individuals
-    [fitness_hamming(k)] = hamming(outputs(k,:),number_inputs,target_output);
-
-    [fitness_coste(k)] = cost(number_inputs,number_gates,suma_columnas(:,k));
-end
-    [fitness_global] = fitness(fitness_hamming, fitness_coste, number_gates);
-
-    fitness_media = mean(fitness_global(3,:));
-
-    fitness_minima = min(fitness_global(3,:));
-
-
-
-[seleccion_final] =selection (fitness_global, number_individuals);
-
-optimo = cell (1,length(seleccion_final(1,:)));
-
-
-for i = 1:length(seleccion_final(1,:))
-    optimo{i} = tabla(:,:,seleccion_final(2,i));
-end
-
-tabla(:,:,:)= 0;
-for i = 1:length(optimo)
-    tabla(:,:,i)= optimo{i};
-end
-
-best_fitness = 10^20;
-best_table = zeros(number_gates + number_inputs);
-
-
-for niter = 2:number_iterations
-
-    % Recombination
-    if number_gates>1
-        if (length(optimo)>1)
-            tabla = recombination( tabla,optimo, number_gates, number_inputs, number_individuals );
-        end
+    % Recombination: Create the rest of the population with breeds of the
+    % best individuals
+    if (length(bestIndividuals)>1)
+        population = recombination(population, bestIndividuals, nGates, nInputs, nIndividuals);
     end
-    % Mutation
-    for k = (length(optimo)+1):number_individuals
-        tasa_mutacion = randi(mutation_rateMAX*100)/100;
-        tabla(:,:,k) = mutation(tabla(:,:,k),ceil(number_gates/4),number_gates,number_inputs,tasa_mutacion);
+    
+    % Incorporate individuals to the population. Eventually, produce mutations
+    for iSelected = (length(bestIndividuals)+1):nIndividuals
+        population(:,:,iSelected) = mutation(population(:,:,iSelected), 10, nGates, nInputs, mutationRate);
     end 
-
-    % Fitness calculation
-    for k = 1:number_individuals
-
-        suma_columnas(:,k) = sum(tabla(:,:,k));                                                     
-
-        suma_filas(:,k) = sum(tabla(:,:,k),2);
-
-        [estados(:,:,:), matriz_estados(:,:,k), outputs(k,:)] = output(tabla(:,:,k),number_gates, number_inputs,inputs,suma_columnas(:,k));
-
+    
+    % Compute each individual and its fitness
+    for iSelected = 1:nIndividuals
+        sumColumns(:,iSelected) = sum(population(:,:,iSelected));                                                     
+        sumRows(:,iSelected) = sum(population(:,:,iSelected),2);
+        [statesMatrixPopulation(:,:,iSelected), outputs(iSelected,:)] = ...
+            output(population(:,:,iSelected), nGates, nInputs, inputs, sumColumns(:,iSelected));
+        fitnessHamming(iSelected) = hamming(outputs(iSelected,:),nInputs,targetOutput);
+        fitnessCost(iSelected) = cost(nInputs, nGates, sumColumns(:,iSelected));
     end
+    
+    % Compute the fitness of the population
+    globalFitness = fitness(fitnessHamming, fitnessCost, nGates);
+    avgFitness(iIteration) = mean(globalFitness(3,:));
+    minFitness(iIteration) = min(globalFitness(3,:));
+    finalSelection = selection(globalFitness, nIndividuals);
+    nSelected = size(finalSelection(1,:), 2);
+    bestIndividuals = cell(1, nSelected);    
 
-    for k = 1:number_individuals
-        [fitness_hamming(k)] = hamming(outputs(k,:),number_inputs,target_output);
-
-        [fitness_coste(k)] = cost(number_inputs,number_gates,suma_columnas(:,k));
+    % Store the best individuals, initialize again the population and 
+    % repopulate the population with them
+    for iSelected = 1:nSelected
+        bestIndividuals{iSelected} = population(:,:,finalSelection(2,iSelected));
     end
-
-    [fitness_global] = fitness(fitness_hamming, fitness_coste, number_gates);
-
-    fitness_media(niter) = mean(fitness_global(3,:));
-
-    fitness_minima(niter) = min(fitness_global(3,:));
-
-    [seleccion_final] = selection (fitness_global,number_individuals);
-
-    clearvars optimo
-
-    optimo = cell (1,length(seleccion_final(1,:)));
-
-
-    for i = 1:length(seleccion_final(1,:))
-        optimo{i} = tabla(:,:,seleccion_final(2,i));
-    end
-
-    tabla(:,:,:)= 0;
-    for i = 1:length(optimo)
-        tabla(:,:,i)= optimo{i};
+    population = zeros(size(population));
+    for iSelected = 1:nSelected
+        population(:,:,iSelected)= bestIndividuals{iSelected};
     end
 
     % Fitness calculation (keep the best)
-    for k = 1:length(optimo)
-
-        suma_columnas(:,k) = sum(tabla(:,:,k));                                                     
-
-        suma_filas(:,k) = sum(tabla(:,:,k),2);
-
-        [estados(:,:,:), matriz_estados(:,:,k), outputs(k,:)] = output(tabla(:,:,k),number_gates, number_inputs,inputs,suma_columnas(:,k));
-
-        [fitness_hamming(k)] = hamming(outputs(k,:),number_inputs,target_output);
-
-        [fitness_coste(k)] = cost(number_inputs,number_gates,suma_columnas(:,k));
+    for iSelected = 1:nSelected
+        sumColumns(:,iSelected) = sum(population(:,:,iSelected));                                                     
+        sumRows(:,iSelected) = sum(population(:,:,iSelected),2);
+        [statesMatrixPopulation(:,:,iSelected), outputs(iSelected,:)] = ...
+            output(population(:,:,iSelected),nGates, nInputs,inputs,sumColumns(:,iSelected));
+        [fitnessHamming(iSelected)] = hamming(outputs(iSelected,:),nInputs,targetOutput);
+        [fitnessCost(iSelected)] = cost(nInputs,nGates,sumColumns(:,iSelected));
     end
+    
+    % Calculate the global fitness
+    globalFitness(:,1:nSelected) = ...
+        fitness(fitnessHamming(1:nSelected), fitnessCost(1:nSelected), nGates);
 
-    fitness_global(:,1:length(optimo)) = fitness(fitness_hamming(1:length(optimo)), fitness_coste(1:length(optimo)), number_gates);
-
-
-    best_table = tabla(:,:,1);
-    best_fitness = fitness_global(3,1);
-    best_output = outputs(1,:);
-    best_hamming = fitness_hamming(1);
-    best_cost = fitness_coste(1);
-    gates = sum(sum(best_table)>0);
-    connections = sum(sum(best_table));
-
-    if mod(niter,250) == 0
+    % Print stats
+    bestIndividual = population(:,:,1);
+    bestFitness = globalFitness(3,1);
+    bestOutput = outputs(1,:);
+    bestHamming = fitnessHamming(1);
+    bestCost = fitnessCost(1);
+    totalGates = sum(sum(bestIndividual) > 0);
+    totalConnections = sum(sum(bestIndividual));
+    
+    if mod(iIteration, iInfo) == 0
         clc;
-        fprintf('--------- Boolean Circuit Optimization ---------\n')
-        fprintf("\nNumber of iterations: %d",niter);
-        fprintf("\nNumber of gates: %d", gates);
-        fprintf("\nNumber of connections: %d", connections);
-        fprintf("\nBest hamming distance: %d",best_hamming);
-        fprintf("\nBest cost: %d",best_cost);
-        fprintf("\nTarget output: %s",num2str(target_output));
-        fprintf("\nBest output:   %s\n\n",num2str(best_output));
+        fprintf('--------- Digital Circuit Optimization ---------\n')
+        fprintf("\nNumber of iterations: %d",iIteration);
+        fprintf("\nNumber of gates: %d", totalGates);
+        fprintf("\nNumber of connections: %d", totalConnections);
+        fprintf("\nBest hamming distance: %d",bestHamming);
+        fprintf("\nBest cost: %d",bestCost);
+        fprintf("\nTarget output: %s",num2str(targetOutput));
+        fprintf("\nBest output:   %s\n\n",num2str(bestOutput));
         fprintf('         -------------  *  ------------\n');
     end
 
-
 end
 
-if best_hamming > 0
+if (bestHamming > 0)
     warning("\nNo optimal solution could be found.")
 end
 
+% Plot the minumum and average fitness across iterations
 subplot(2,1,1)
-plot(fitness_minima,'r');
-title('Minimum fitness','Fontsize',15);
-xlabel('iterations','Fontsize',12);
-ylabel('fitness','Fontsize',12);
+plot(minFitness,'b');
+title('Minimum fitness','interpreter','latex','fontsize',20);
+ylabel('fitness','interpreter','latex','fontsize',20);
 subplot(2,1,2)
-plot(fitness_media,'b');
-title('Average fitness','Fontsize',15);
-xlabel('iterations','Fontsize',12);
-ylabel('fitness','Fontsize',12)
+plot(avgFitness,'b');
+title('Average fitness','interpreter','latex','fontsize',20);
+xlabel('iterations','interpreter','latex','fontsize',20);
+ylabel('fitness','interpreter','latex','fontsize',20)

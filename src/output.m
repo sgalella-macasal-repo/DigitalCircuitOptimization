@@ -1,65 +1,83 @@
-function [states, states_matrix, outputs] = output(table,number_gates, number_inputs,inputs,sum_columns)
-% Authors: mikirubio, sgalella
+function [statesMatrix, outputs] = output(individual, nGates, nInputs, inputs, sumColumns)
+%
+% Function:
+% - output: Computes the output of an individual for different inputs 
+%
+% Inputs: 
+% - individual: Connectivity matrix of logical circuits (nComponents x
+%               nComponents)
+% - nGates: Number of logic gates conforming the individuals (int)
+% - nInputs: Number of total inputs in the individual (int)
+% - inputs: Total different number of inputs (2^nInputs x nInputs)
+% – sumColumns: Sum of the columns of an individual (1 x nComponents)
+%
+% Outputs:
+% - statesMatrix: Contains input and output of an individual (The first three
+%                 components of each row represent the input, the rest, the 
+%                 output (2^nInputs, nComponents)
+% - outputs: Output of an individual for the different inptus (2^nInputs x 1)
+%
+% Authors: mikirubio & sgalella
+% https://github.com/sgalella-mikirubio-repo
 
-% Input vector for gates
-states = zeros(number_gates,2,(2^number_inputs));                                                           
+% Initialization
+states = zeros(nGates, 2,(2^nInputs));
+statesMatrix = NaN(2^nInputs, nGates + nInputs);
+outputs = NaN(1,2^nInputs);  
+gate = 0;
 
-% Output vector (compared to objective_output)
-outputs = zeros(1,2^number_inputs);                                              
-
-for iteracion = 1:(2^number_inputs)
+for nInput = 1:(2^nInputs)
    
     % Inputs and states of the gates
-    states_matrix(iteracion,:) =  [inputs(iteracion,:) ,zeros(1,number_gates)];           
-
+    statesMatrix(nInput,:) = [inputs(nInput,:), zeros(1, nGates)];           
     
-    for j=(number_inputs+1):(number_gates + number_inputs)                    
+    for column = (nInputs + 1):(nGates + nInputs)                    
         % Case 1: one entry
-        if sum_columns(j) == 1
+        if (sumColumns(column) == 1)
             % Condition: number of connextions per gate
-            for i=1:(number_gates+number_inputs)
-                if table(i,j) == 1
-                    states(j-number_inputs,1,iteracion) = states_matrix(iteracion,i);
-                    states(j-number_inputs,2,iteracion) = 0;
+            for row = 1:(nGates+nInputs)
+                if (individual(row,column) == 1)
+                    states(column-nInputs,1,nInput) = statesMatrix(nInput,row);
+                    states(column-nInputs,2,nInput) = 0;
                 end
             end
             % NOR gate: Assignation output values
-            if states(j-number_inputs,1,iteracion) + states (j-number_inputs,2,iteracion) >= 1
-                states_matrix(iteracion,j) = 0;
-            elseif states(j-number_inputs,1,iteracion) + states (j-number_inputs,2,iteracion) == 0
-                states_matrix(iteracion,j) = 1;
+            if (states(column-nInputs,1,nInput) + states(column-nInputs,2,nInput) >= 1)
+                statesMatrix(nInput,column) = 0;
+            elseif (states(column-nInputs,1,nInput) + states(column-nInputs,2,nInput) == 0)
+                statesMatrix(nInput,column) = 1;
             end
         else
             % Case 2: two entries
-            if sum_columns(j)==0
-                states_matrix(iteracion,j)=0;
+            if (sumColumns(column) == 0)
+                statesMatrix(nInput,column) = 0;
             else
                 % Case 3: three entries
-                if sum_columns(j) == 2
+                if (sumColumns(column) == 2)
                     a = 1;
-                    for i=1:number_gates+number_inputs
-                        if table(i,j) == 1
-                            states(j-number_inputs,a,iteracion) = states_matrix(iteracion,i);
+                    for row=1:nGates+nInputs
+                        if (individual(row,column) == 1)
+                            states(column-nInputs,a,nInput) = statesMatrix(nInput,row);
                             a = a + 1;
                         end
                     end
                     % NOR gate output vector assignation
-                    if states(j-number_inputs,1,iteracion) + states (j-number_inputs,2,iteracion) >= 1
-                        states_matrix(iteracion,j) = 0;
-                    elseif states(j-number_inputs,1,iteracion) + states (j-number_inputs,2,iteracion) == 0
-                        states_matrix(iteracion,j) = 1;
+                    if states(column-nInputs,1,nInput) + states (column-nInputs,2,nInput) >= 1
+                        statesMatrix(nInput,column) = 0;
+                    elseif states(column-nInputs,1,nInput) + states (column-nInputs,2,nInput) == 0
+                        statesMatrix(nInput,column) = 1;
                     end
                 end
             end
         end
     end
-    puerta = 0;
-    for indice = (number_inputs+1):(number_gates+number_inputs)
-        if sum_columns(indice) > 0
-            puerta = indice - number_inputs;
+    
+    for iGate = (nInputs+1):(nGates+nInputs)
+        if sumColumns(iGate) > 0
+            gate = iGate - nInputs;
         end
     end
-    outputs(iteracion) = states_matrix(iteracion,puerta+number_inputs);
+    outputs(nInput) = statesMatrix(nInput,gate+nInputs);
 end
 
 

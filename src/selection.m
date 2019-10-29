@@ -1,18 +1,38 @@
-function selected_individuals = selection(global_fitness,number_individuals)
-% Authors: mikirubio, sgalella
+function selectedIndividuals = selection(globalFitness, nIndividuals)
+%
+% Function:
+% - selection: Selects best individuals from the population according to 
+%              the globalFitness
+%
+% Inputs: 
+% - globalFitness: Overall fitness of the population (3 x nIndividuals)
+% - nIndividuals: Number of individuals of the population (int)
+%
+% Outputs:
+% - selectedIndividuals: Individuals with best fitness (2 x nSelected)
+%
+% Authors: mikirubio & sgalella
+% https://github.com/sgalella-mikirubio-repo
 
-operador_fitness = global_fitness(3,:);
 
-if min(global_fitness(1,:))==0
-    individuos = number_individuals/4;
+% Retrieve the overall fitness from globalFitness
+fitnessIndividuals = globalFitness(3,:);
+
+% Select the number of selected individuals according to their hamming
+if (min(globalFitness(1,:)) == 0)
+    nSelected = ceil(nIndividuals/4);
 else
-    individuos = number_individuals/2;
+    nSelected = ceil(nIndividuals/2);
 end
-    
-    for i = 1:ceil(individuos)
-        [selected_individuals(1,i),selected_individuals(2,i)] = min(operador_fitness);
-        operador_fitness(selected_individuals(2,i)) = 10^11;
-    end
+
+% Sort the fitness in ascending order
+selectedIndividuals = NaN(nIndividuals, nSelected);
+for iSelected = 1:nSelected
+    [minFitnessIndividuals, idxFitnessIndividuals] = min(fitnessIndividuals);
+    selectedIndividuals(1,iSelected) = minFitnessIndividuals;
+    selectedIndividuals(2,iSelected) = idxFitnessIndividuals;
+    fitnessIndividuals(selectedIndividuals(2,iSelected)) = Inf;
+end
     
 
 end

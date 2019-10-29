@@ -1,51 +1,73 @@
-function table = recombination( table,optimum, number_gates, number_inputs, number_individuals )
-% Authors: mikirubio, sgalella
+function population = recombination(population, bestIndividuals, nGates, nInputs, nIndividuals)
+%
+% Function:
+% - recombination: Repopulates population with offspring of best individuals
+%
+% Inputs: 
+% - population: Connectivity matrix of the population (not repopulated)
+% - bestIndividuals: Connectivity matrix of the individuals with better fitness
+%                    (cell 1 x x nSelected)
+% - nGates: Number of logic gates conforming the individuals (int)
+% - nInputs: Number of total inputs in the individual (int)
+% – nIndividuals: Number of total individuals conforming the population (int)
+%
+% Outputs:
+% - population: Connectivity matrix of the population (repopulated)
+%
+% Authors: mikirubio & sgalella
+% https://github.com/sgalella-mikirubio-repo
 
-    for i = length(optimum)+1:(number_individuals)
+nSelected = size(bestIndividuals,2);
+recombinationType = NaN(1, nIndividuals-nSelected);
 
-        columnas_hija = ones(1,number_inputs+number_gates);
-        tabla_hija = zeros(number_gates+number_inputs);
-        while sum(columnas_hija)>0
-
-            padre = randi(length(optimum));
-            madre = randi(length(optimum));
-            while padre == madre
-                madre = randi(length(optimum));
-            end
-
-            tabla_padre = table(:,:,padre);
-            tabla_madre = table(:,:,madre);
-
-            tipo_recombinacion(i-length(optimum)+1) = randi(3);
-
-            % Vertical split
-            if tipo_recombinacion(i-length(optimum)+1) == 1
-               corte_vertical = number_inputs + randi(number_gates-1);
-               tabla_hija(:,1:corte_vertical) = tabla_padre(:,1:corte_vertical);
-               tabla_hija(:,(corte_vertical+1):(number_gates+number_inputs))=tabla_madre(:,(corte_vertical+1):(number_gates+number_inputs));
-            % Horizontal split
-            elseif tipo_recombinacion(i-length(optimum)+1) == 2
-               corte_horizontal = randi(number_gates+ number_inputs -1);
-               tabla_hija(1:corte_horizontal,:) = tabla_padre(1:corte_horizontal,:);
-               tabla_hija((corte_horizontal+1):(number_gates+number_inputs),:)=tabla_madre((corte_horizontal+1):(number_gates+number_inputs),:);
-            % Mixed split
-            elseif tipo_recombinacion(i-length(optimum)+1) == 3
-               corte_vertical = number_inputs+ randi(number_gates-1);
-               corte_horizontal = number_inputs+ randi(number_gates-1);
-               tabla_hija(1:corte_horizontal,1:corte_vertical)=tabla_padre(1:corte_horizontal,1:corte_vertical);
-               tabla_hija(1:corte_horizontal,(corte_vertical+1):(number_gates+number_inputs))=tabla_madre(1:corte_horizontal,(corte_vertical+1):(number_gates+number_inputs));
-               if rand(1)<0.5
-                  tabla_hija((corte_horizontal+1:number_gates+number_inputs),:)= tabla_padre((corte_horizontal+1:number_gates+number_inputs),:);
-               else
-                  tabla_hija((corte_horizontal+1:number_gates+number_inputs),:)= tabla_madre((corte_horizontal+1:number_gates+number_inputs),:);
-               end
-            end
-            columnas_hija = sum(tabla_hija);
-            columnas_hija = columnas_hija > 2;
+for iChild = nSelected+1:(nIndividuals)
+    
+    % Initialize the connectivity matrix of the child
+    columnsChild = ones(1, nInputs+nGates);
+    child = zeros(nGates+nInputs);
+    
+    while (sum(columnsChild) > 0)
+        idFather = randi(nSelected);
+        idMother = randi(nSelected);    
+        while idFather == idMother
+            idMother = randi(nSelected);
         end
-        table(:,:,i) = tabla_hija;
-
+        father = population(:,:,idFather);
+        mother = population(:,:,idMother);
+        
+        % Calculate the recombination type. Indexing for debugging.
+        recombinationType(iChild-nSelected+1) = randi(3);
+        
+        % Vertical split
+        if recombinationType(iChild-nSelected+1) == 1
+           verticalCut = nInputs + randi(nGates-1);
+           child(:,1:verticalCut) = father(:,1:verticalCut);
+           child(:,(verticalCut+1):(nGates+nInputs))=mother(:,(verticalCut+1):(nGates+nInputs));
+           
+        % Horizontal split
+        elseif recombinationType(iChild-nSelected+1) == 2
+           horizontalCut = randi(nGates+ nInputs -1);
+           child(1:horizontalCut,:) = father(1:horizontalCut,:);
+           child((horizontalCut+1):(nGates+nInputs),:)=mother((horizontalCut+1):(nGates+nInputs),:);
+           
+        % Mixed split
+        elseif recombinationType(iChild-nSelected+1) == 3
+           verticalCut = nInputs+ randi(nGates-1);
+           horizontalCut = nInputs+ randi(nGates-1);
+           child(1:horizontalCut,1:verticalCut)=father(1:horizontalCut,1:verticalCut);
+           child(1:horizontalCut,(verticalCut+1):(nGates+nInputs))=mother(1:horizontalCut,(verticalCut+1):(nGates+nInputs));
+           if rand(1)<0.5
+              child((horizontalCut+1:nGates+nInputs),:)= father((horizontalCut+1:nGates+nInputs),:);
+           else
+              child((horizontalCut+1:nGates+nInputs),:)= mother((horizontalCut+1:nGates+nInputs),:);
+           end
+       
+        end
+        columnsChild = sum(child);
+        columnsChild = columnsChild > 2;
     end
+    population(:,:,iChild) = child;
+end
 
 end
 
