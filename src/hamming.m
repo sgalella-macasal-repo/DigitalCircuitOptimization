@@ -1,13 +1,26 @@
-function hamming_fitness = hamming(outputs,number_inputs,target_output)
-% Authors: mikirubio, sgalella
+function hammingFitness = hamming(outputs, nInputs, targetOutput)
+%
+% Function:
+% - hamming: Computes the hamming distance of the outputs
+%
+% Inputs: 
+% - output: Output from an individual of the population (1x2^nInputs)
+% - nInputs: Numper of total inputs in the individual (int)
+% - targetOutput: Target output of the circuit (1x2^nInputs)
+%
+% Outputs:
+% - hammingFitness: Hamming fitness for each individual (1 x nIndividuals)
+%
+% Authors: mikirubio & sgalella
+% https://github.com/sgalella-mikirubio-repo
 
-    hamming_fitness = 0;
-    % Comparison output vectors and target_output
-    for indice_salida = 1:(2^number_inputs)                                         
-        if outputs(indice_salida)~= target_output(indice_salida)
-            hamming_fitness = hamming_fitness + 1;
-        end
+% Comparison output and targetOutput
+hammingFitness = 0;
+for iInput = 1:(2^nInputs)                                         
+    if outputs(iInput)~= targetOutput(iInput)
+        hammingFitness = hammingFitness + 1;
     end
+end
 
 end
 
