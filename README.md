@@ -1,5 +1,5 @@
 # Digital Circuit Optimization
-###### _Authors:  mikirubio & sgalella_
+###### _Authors:  macasal & sgalella_
 
 MATLAB implementation of an evolutionary algorithm for designing and optimizing digital circuits. Given a number of inputs and a target output, the algorithm finds a logical circuit that fulfills those conditions.
 
