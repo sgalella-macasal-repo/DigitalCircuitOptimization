@@ -11,8 +11,8 @@ function globalFitness = fitness(hammingFitness, costFitness, nGates)
 % Outputs:
 % - globalFitness: Overall fitness of the individuals (3 x nIndividuals)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Set the hamming and cost to be part of the globalFitness (visualization
 % purposes)

@@ -2,8 +2,8 @@
 %
 % 10 Automatic tests for circuits with 2 inputs
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Add path to optimizer folder
 addpath('../src/');

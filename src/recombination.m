@@ -14,8 +14,8 @@ function population = recombination(population, bestIndividuals, nGates, nInputs
 % Outputs:
 % - population: Connectivity matrix of the population (repopulated)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 nSelected = size(bestIndividuals,2);
 recombinationType = NaN(1, nIndividuals-nSelected);

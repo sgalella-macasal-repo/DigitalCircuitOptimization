@@ -11,8 +11,8 @@ function hammingFitness = hamming(outputs, nInputs, targetOutput)
 % Outputs:
 % - hammingFitness: Hamming fitness for each individual (1 x nIndividuals)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Comparison output and targetOutput
 hammingFitness = 0;
