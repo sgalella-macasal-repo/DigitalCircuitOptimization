@@ -11,8 +11,8 @@ function costFitness = cost(nInputs, nGates, sumColumns)
 % Outputs:
 % - costFitness: Cost of the individual (1 x nIndividuals)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Compute the total number of gates in an individual
 totalGates = 0;

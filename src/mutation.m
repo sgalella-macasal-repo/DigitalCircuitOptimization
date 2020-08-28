@@ -14,8 +14,8 @@ function individual = mutation(individual, nMutations, nGates, nInputs, mutation
 % Outputs:
 % - individual: Mutated connectivity matrix (nComponents x nComponents)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 for iMutation = 1:nMutations
     

@@ -11,8 +11,8 @@ function [bestOutput, bestIndividual] = circuitoptimizer(Params, targetOutput)
 % - bestOutput: Output achieved by the best circuit (1 x 2^nInputs)
 % - bestIndividual: Connectivity matrix of the best circuit
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 
 iInfo = Params.iInfo;

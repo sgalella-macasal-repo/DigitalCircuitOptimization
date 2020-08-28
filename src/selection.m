@@ -11,8 +11,8 @@ function selectedIndividuals = selection(globalFitness, nIndividuals)
 % Outputs:
 % - selectedIndividuals: Individuals with best fitness (2 x nSelected)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 
 % Retrieve the overall fitness from globalFitness

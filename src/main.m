@@ -2,8 +2,8 @@
 %
 % Setup and run the genetic algorithm
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Set the random seed for controlling rng
 runSeed = 4321;

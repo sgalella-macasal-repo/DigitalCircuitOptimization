@@ -17,8 +17,8 @@ function [statesMatrix, outputs] = output(individual, nGates, nInputs, inputs, s
 %                 output (2^nInputs, nComponents)
 % - outputs: Output of an individual for the different inptus (2^nInputs x 1)
 %
-% Authors: mikirubio & sgalella
-% https://github.com/sgalella-mikirubio-repo
+% Authors: macasal & sgalella
+% https://github.com/sgalella-macasal-repo
 
 % Initialization
 states = zeros(nGates, 2,(2^nInputs));
