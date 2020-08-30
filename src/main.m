@@ -58,7 +58,7 @@ end
 % Compute the fitness of the first population
 globalFitness = fitness(fitnessHamming, fitnessCost, nGates);
 avgFitness = mean(globalFitness(3,:));
-minFitness = min(globalFitness(3,:));
+maxFitness = max(globalFitness(3,:));
 finalSelection = selection(globalFitness, nIndividuals);
 nSelected = size(finalSelection(1,:), 2);
 
@@ -100,7 +100,7 @@ for iIteration = 2:nIterations
     % Compute the fitness of the population
     globalFitness = fitness(fitnessHamming, fitnessCost, nGates);
     avgFitness(iIteration) = mean(globalFitness(3,:));
-    minFitness(iIteration) = min(globalFitness(3,:));
+    maxFitness(iIteration) = max(globalFitness(3,:));
     finalSelection = selection(globalFitness, nIndividuals);
     nSelected = size(finalSelection(1,:), 2);
     bestIndividuals = cell(1, nSelected);    
@@ -160,11 +160,13 @@ end
 
 % Plot the minumum and average fitness across iterations
 subplot(2,1,1)
-plot(minFitness,'r');
-title('Minimum fitness','interpreter','latex','fontsize',20);
+plot(maxFitness,'r');
+ylim([0 1.1])
+title('Maximum fitness','interpreter','latex','fontsize',20);
 ylabel('fitness','interpreter','latex','fontsize',20);
 subplot(2,1,2)
 plot(avgFitness,'b');
+ylim([0 1.1])
 title('Average fitness','interpreter','latex','fontsize',20);
 xlabel('iterations','interpreter','latex','fontsize',20);
 ylabel('fitness','interpreter','latex','fontsize',20)

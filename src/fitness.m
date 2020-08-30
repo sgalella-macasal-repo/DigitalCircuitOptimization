@@ -25,11 +25,7 @@ nIndividuals = length(hammingFitness);
 % Set the fitness to be equal the hammingDistance if this is different than
 % 0. Otherwise, let it be equal to the cost divided by nGates^2.
 for iIndividual = 1:nIndividuals
-    if hammingFitness(iIndividual) == 0 
-        globalFitness(3,iIndividual) = globalFitness(2,iIndividual)/(nGates^2);
-    elseif hammingFitness(iIndividual) > 0
-        globalFitness(3,iIndividual) = hammingFitness(iIndividual);
-    end
+    globalFitness(3,iIndividual) = 1 / (1 + hammingFitness(iIndividual));
 end
 
 end

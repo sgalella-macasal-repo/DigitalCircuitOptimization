@@ -28,10 +28,10 @@ end
 % Sort the fitness in ascending order
 selectedIndividuals = NaN(nIndividuals, nSelected);
 for iSelected = 1:nSelected
-    [minFitnessIndividuals, idxFitnessIndividuals] = min(fitnessIndividuals);
-    selectedIndividuals(1,iSelected) = minFitnessIndividuals;
+    [maxFitnessIndividuals, idxFitnessIndividuals] = max(fitnessIndividuals);
+    selectedIndividuals(1,iSelected) = maxFitnessIndividuals;
     selectedIndividuals(2,iSelected) = idxFitnessIndividuals;
-    fitnessIndividuals(selectedIndividuals(2,iSelected)) = Inf;
+    fitnessIndividuals(selectedIndividuals(2,iSelected)) = -Inf;
 end
     
 
